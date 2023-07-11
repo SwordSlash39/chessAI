@@ -3,6 +3,13 @@ from gameChess import chess_game
 import chess
 import numpy as np
 
+"""
+--------------------------------------------------------------
+NOT PART OF OFFICIAL MACHINE LEARNING PROGRAM. THIS PROGRAM IS TO FACILIATE A MODEL-VS-MODEL GAME WITHOUT TRAINING
+THE GAME WILL BE UPLOADED INTO MODEL_GAME.TXT AND WILL BE IN PGN FORMAT
+--------------------------------------------------------------
+"""
+
 def gamgin():
     agent = Agent()
     game = chess_game()
