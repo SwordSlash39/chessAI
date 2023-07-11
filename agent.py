@@ -42,7 +42,7 @@ class Agent:
     
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        self.memory.append([state, action, reward, next_state, done])
 
     def train_long_memory(self):
         if len(self.memory) > BATCH_SIZE:
@@ -57,10 +57,14 @@ class Agent:
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, board: chess.Board, color):
-        self.epsilon = (80 * (0.99 ** self.n_games) + 1) if not self.testing else 0
+        self.epsilon = (80 * (0.99 ** self.n_games) + 1) if not self.testing else -1
         legalMoves = list(board.legal_moves)
         tmp = chess_game()
         output = [0] * len(legalMoves)
+        
+        if len(legalMoves) == 1:    # optimize for forced moves
+            return [1]
+        
         if random.random() * 200 < self.epsilon:
             output[random.randint(0, len(legalMoves) - 1)] = 1
             return output
