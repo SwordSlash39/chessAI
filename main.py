@@ -28,11 +28,13 @@ def train():
 
         # perform move and get new state
         reward_white, done_white = game.step(final_move)
+        try:
+            # adjust rewards
+            reward_black -= reward_white
+            agent.remember(state_old_black, final_move_black, reward_black, state_new_black, done_black)
+        except UnboundLocalError:
+            pass
         state_new = game.get_state()
-
-        # remember
-        agent.remember(state_old, final_move, reward_white, state_new, done_white)
-
         """
         ----------------------------------------------------------------
         BLACK'S TURN
@@ -60,10 +62,13 @@ def train():
         # perform move and get new state
         reward_black, done_black = game.step(final_move_black)
         state_new_black = game.get_state()
-
-
-        # remember
-        agent.remember(state_old_black, final_move_black, reward_black, state_new_black, done_black)
+        
+        # deduct for black
+        reward_white -= reward_black
+        # white remember
+        agent.remember(state_old, final_move, reward_white, state_new, done_white)
+        
+        
 
         if done_black:
             QLearn(game, agent)
