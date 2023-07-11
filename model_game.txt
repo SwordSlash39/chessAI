@@ -1,0 +1,2 @@
+FILE USE:
+- This file displays the pgn from model_vs_model.py, and you can copy paste the pgn into a website like lichess.org
