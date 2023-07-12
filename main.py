@@ -14,7 +14,6 @@ def QLearn(game, agent):
     if agent.n_games % 3 == 0:
         print(f"Saving model with {agent.n_games} Games played...")
         agent.saveModel('model.pth')
-        print("\033[A                                           \033[A")
 
 def train():
     move = 1
