@@ -12,7 +12,7 @@ THE GAME WILL BE UPLOADED INTO MODEL_GAME.TXT AND WILL BE IN PGN FORMAT
 
 
 def gamgin():
-    agent = Agent()
+    agent = Agent(testing=True)
     game = chess_game()
     fullgame = ""
 
