@@ -3,9 +3,8 @@ from gameChess import chess_game
 
 
 
-def QLearn(game, agent, move):
+def QLearn(game, agent):
     print ("\033[A                             \033[A")
-    move = 1
     game.reset()
     agent.n_games += 1
     agent.train_long_memory()
