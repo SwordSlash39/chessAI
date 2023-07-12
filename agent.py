@@ -41,20 +41,20 @@ class Agent:
             }, file_name)
     
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append([state, action, reward, next_state, done])
+    def remember(self, state, rand, reward, next_state, done, color):
+        self.memory.append([state, rand, reward, next_state, done, color])
 
-    def train_long_memory(self, rand):
+    def train_long_memory(self):
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE)
         else:
             mini_sample = self.memory
 
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
+        states, actions, rewards, next_states, dones, rand = zip(*mini_sample)
         self.trainer.train_step(states, actions, rewards, next_states, dones, rand)
 
-    def train_short_memory(self, state, action, reward, next_state, done, rand):
-        self.trainer.train_step(state, action, reward, next_state, done, rand)
+    def train_short_memory(self, state, rand, reward, next_state, done, color):
+        self.trainer.train_step(state, rand, reward, next_state, done, color)
 
     def get_action(self, board: chess.Board, color):
         self.epsilon = (80 * (0.99 ** self.n_games) + 1) if not self.testing else -1
@@ -63,11 +63,11 @@ class Agent:
         output = [0] * len(legalMoves)
         
         if len(legalMoves) == 1:    # optimize for forced moves
-            return [1]
+            return [1], False   # false for not random
         
         if random.random() * 200 < self.epsilon:
             output[random.randint(0, len(legalMoves) - 1)] = 1
-            return output, True
+            return output, True     # True bc its random
 
         pos_eval = []
         for i in range(len(legalMoves)):
@@ -82,7 +82,7 @@ class Agent:
         move = torch.tensor(pos_eval, dtype=torch.float16, device=DEVICE)
         if color == "white":
             output[move.argmax().item()] = 1
-            return output, False
+            return output, False    # False for not random
         output[move.argmin().item()] = 1
         return output, False
 
