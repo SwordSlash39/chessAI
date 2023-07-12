@@ -26,7 +26,7 @@ def gamgin():
         """
 
         # get move
-        final_move = agent.get_action(game.board, "white")
+        final_move, _ = agent.get_action(game.board, "white")
         mover = np.array(final_move, dtype="int16")
         fullgame += f"{move}. {game.board.san(list(game.board.legal_moves)[np.argmax(mover)])} "
 
@@ -41,7 +41,7 @@ def gamgin():
         if done_white:
             break
         # get move
-        final_move = agent.get_action(game.board, "black")
+        final_move, _ = agent.get_action(game.board, "black")
         mover = np.array(final_move, dtype="int16")
 
         # perform move and get new state
@@ -50,6 +50,7 @@ def gamgin():
 
         if done_black:
             break
+        print("\033[A                                      \033[A")
         print(f"Move: {move} completed!")
         move += 1
     with open("model_game.txt", "w") as f:
