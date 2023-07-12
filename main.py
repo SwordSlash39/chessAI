@@ -30,7 +30,7 @@ def train():
         reward_white, done_white = game.step(final_move)
         try:
             # adjust rewards
-            reward_black -= reward_white
+            reward_black += reward_white
             agent.remember(state_old_black, final_move_black, reward_black, state_new_black, done_black)
         except UnboundLocalError:
             pass
@@ -45,7 +45,7 @@ def train():
             agent.saveModel('model.pth')
             
             if reward_white >= game.CHECKMATE:  # more means win (win reward always more than 200 else i stoopid)
-                agent.memory[-2][2] -= game.CHECKMATE
+                agent.memory[-2][2] += game.CHECKMATE
             continue
         else:
             # train short memory only IF it isnt checkmate
@@ -61,6 +61,7 @@ def train():
 
         # perform move and get new state
         reward_black, done_black = game.step(final_move_black)
+        reward_black *= -1
         state_new_black = game.get_state()
         
         # deduct for black
