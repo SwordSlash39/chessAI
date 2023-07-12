@@ -44,17 +44,17 @@ class Agent:
     def remember(self, state, action, reward, next_state, done):
         self.memory.append([state, action, reward, next_state, done])
 
-    def train_long_memory(self):
+    def train_long_memory(self, rand):
         if len(self.memory) > BATCH_SIZE:
             mini_sample = random.sample(self.memory, BATCH_SIZE)
         else:
             mini_sample = self.memory
 
         states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
+        self.trainer.train_step(states, actions, rewards, next_states, dones, rand)
 
-    def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, done)
+    def train_short_memory(self, state, action, reward, next_state, done, rand):
+        self.trainer.train_step(state, action, reward, next_state, done, rand)
 
     def get_action(self, board: chess.Board, color):
         self.epsilon = (80 * (0.99 ** self.n_games) + 1) if not self.testing else -1
