@@ -78,7 +78,7 @@ class QTrainer:
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
 
-    def train_step(self, state, _, reward, next_state, done):
+    def train_step(self, state, rand, reward, next_state, done, color):
         state = torch.tensor(state, dtype=torch.float, device=DEVICE)
         next_state = torch.tensor(next_state, dtype=torch.float, device=DEVICE)
         reward = torch.tensor(reward, dtype=torch.float, device=DEVICE)
@@ -87,6 +87,8 @@ class QTrainer:
             next_state = torch.unsqueeze(next_state, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
+            rand = (rand, )
+            color = (color, )
         state = state.reshape((state.size(dim=0), 1, 8, 8, 16))
         next_state = next_state.reshape((next_state.size(dim=0), 1, 8, 8, 16))
 
@@ -97,13 +99,14 @@ class QTrainer:
             Q_new = reward[i]
             if not done[i]:
                 unsq = next_state[i]
-                Q_new = reward[i] + self.gamma * torch.max(self.model(unsq))
-            target[0] = Q_new
-            self.optimizer.zero_grad()
-            loss = self.criterion(target, pred)
-            loss.backward()
-
-            self.optimizer.step()
+                Q_new = reward[i] + self.gamma * self.model(unsq)[0]    # self.model returns 1 value so max or min dosent matter
+            if not (rand and ((Q_new < pred[0] and color[i] == "white") or (rand and Q_new > pred[0] and color[i] == "black"))): # Do training as random exploration leaded to better results (if random and Q values less than prediction means random sucked ass)
+                target[0] = Q_new
+                self.optimizer.zero_grad()
+                loss = self.criterion(target, pred)
+                loss.backward()
+                self.optimizer.step()
+            
         if len(done) > 1:
             print(f"Trained off {len(done)} states!")
 
