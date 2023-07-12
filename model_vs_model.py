@@ -10,17 +10,14 @@ THE GAME WILL BE UPLOADED INTO MODEL_GAME.TXT AND WILL BE IN PGN FORMAT
 --------------------------------------------------------------
 """
 
+
 def gamgin():
     agent = Agent()
     game = chess_game()
     fullgame = ""
 
-    # set games if already gaming
-    ngame = 0
-    game.n_games = ngame
-    agent.n_games = ngame
-    agent.n_games = ngame
     move = 1
+    agent.model.eval()
     while True:
         """
         ----------------------------------------------------------------
