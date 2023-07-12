@@ -24,14 +24,14 @@ def train():
         state_old = game.get_state()
 
         # get move
-        final_move = agent.get_action(game.board, "white")
+        final_move, rand = agent.get_action(game.board, "white")
 
         # perform move and get new state
         reward_white, done_white = game.step(final_move)
         try:
             # adjust rewards
             reward_black += reward_white
-            agent.remember(state_old_black, final_move_black, reward_black, state_new_black, done_black)
+            agent.remember(state_old_black, rand_black, reward_black, state_new_black, done_black)
         except UnboundLocalError:
             pass
         state_new = game.get_state()
@@ -50,14 +50,14 @@ def train():
         else:
             # train short memory only IF it isnt checkmate
             try:
-                agent.train_short_memory(state_old_black, final_move_black, reward_black, state_new_black, done_black)
+                agent.train_short_memory(state_old_black, rand_black, reward_black, state_new_black, done_black)
             except UnboundLocalError:
                 pass
 
         state_old_black = state_new
 
         # get move
-        final_move_black = agent.get_action(game.board, "black")
+        final_move_black, rand_black = agent.get_action(game.board, "black")
 
         # perform move and get new state
         reward_black, done_black = game.step(final_move_black)
@@ -67,7 +67,7 @@ def train():
         # deduct for black
         reward_white -= reward_black
         # white remember
-        agent.remember(state_old, final_move, reward_white, state_new, done_white)
+        agent.remember(state_old, rand, reward_white, state_new, done_white)
         
         
 
@@ -80,7 +80,7 @@ def train():
         else:
             # train short memory
             # UnboundedLocalError wont happen because already assigned earlier
-            agent.train_short_memory(state_old, final_move, reward_white, state_new, done_white)
+            agent.train_short_memory(state_old, rand, reward_white, state_new, done_white)
 
 
 if __name__ == '__main__':
