@@ -67,7 +67,7 @@ class Agent:
         
         if random.random() * 200 < self.epsilon:
             output[random.randint(0, len(legalMoves) - 1)] = 1
-            return output
+            return output, True
 
         pos_eval = []
         for i in range(len(legalMoves)):
@@ -82,9 +82,9 @@ class Agent:
         move = torch.tensor(pos_eval, dtype=torch.float16, device=DEVICE)
         if color == "white":
             output[move.argmax().item()] = 1
-            return output
+            return output, False
         output[move.argmin().item()] = 1
-        return output
+        return output, False
 
 
 if __name__ == '__main__':
