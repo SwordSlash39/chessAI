@@ -3,13 +3,16 @@ from gameChess import chess_game
 
 
 
-def QLearn(game, agent):
-  game.reset()
-  agent.n_games += 1
-  agent.train_long_memory()
-  print(f"Game {agent.n_games} ended!")
+def QLearn(game, agent, move):
+    print ("\033[A                             \033[A")
+    move = 1
+    game.reset()
+    agent.n_games += 1
+    agent.train_long_memory()
+    print(f"Game {agent.n_games} ended!")
 
 def train():
+    move = 1
     agent = Agent()
     game = chess_game()
 
@@ -29,9 +32,9 @@ def train():
         # perform move and get new state
         reward_white, done_white = game.step(final_move)
         try:
-            # adjust rewards
+            # adjust rewards ADDING IS NOT A BUG THE EVAL SHOULD BE LOW FOR BLACK
             reward_black += reward_white
-            agent.remember(state_old_black, rand_black, reward_black, state_new_black, done_black)
+            agent.remember(state_old_black, rand_black, reward_black, state_new_black, done_black ,"black")
         except UnboundLocalError:
             pass
         state_new = game.get_state()
@@ -42,6 +45,7 @@ def train():
         """
         if done_white:  # white wins or draw
             QLearn(game, agent)
+            move = 0
             agent.saveModel('model.pth')
             
             if reward_white >= game.CHECKMATE:  # more means win (win reward always more than 200 else i stoopid)
@@ -50,7 +54,7 @@ def train():
         else:
             # train short memory only IF it isnt checkmate
             try:
-                agent.train_short_memory(state_old_black, rand_black, reward_black, state_new_black, done_black)
+                agent.train_short_memory(state_old_black, rand_black, reward_black, state_new_black, done_black, "black")
             except UnboundLocalError:
                 pass
 
@@ -64,15 +68,20 @@ def train():
         reward_black *= -1
         state_new_black = game.get_state()
         
+        # new Move!
+        print ("\033[A                                  \033[A")
+        print(f"Move {move} of Game {agent.n_games+1} played!")
+        move += 1
         # deduct for black
         reward_white -= reward_black
         # white remember
-        agent.remember(state_old, rand, reward_white, state_new, done_white)
+        agent.remember(state_old, rand, reward_white, state_new, done_white, "white")
         
         
 
         if done_black:
             QLearn(game, agent)
+            move = 0
             agent.saveModel('model.pth')
             
             if reward_black >= game.CHECKMATE:  # more means win (win reward always more than 200 else i stoopid)
@@ -80,7 +89,7 @@ def train():
         else:
             # train short memory
             # UnboundedLocalError wont happen because already assigned earlier
-            agent.train_short_memory(state_old, rand, reward_white, state_new, done_white)
+            agent.train_short_memory(state_old, rand, reward_white, state_new, done_white, "white")
 
 
 if __name__ == '__main__':
