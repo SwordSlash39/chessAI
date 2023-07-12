@@ -16,7 +16,7 @@ class Linear_QNet(nn.Module):
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.05),
             nn.LeakyReLU(),
             nn.Conv3d(
                 in_channels=16,
@@ -24,7 +24,7 @@ class Linear_QNet(nn.Module):
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.05),
             nn.LeakyReLU(),
             nn.Conv3d(
                 in_channels=16,
@@ -32,7 +32,7 @@ class Linear_QNet(nn.Module):
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.05),
             nn.LeakyReLU()
         )
         for _ in range(4):
@@ -44,7 +44,7 @@ class Linear_QNet(nn.Module):
                     padding=1
                 )
             )
-            self.image_brain.append(nn.Dropout(p=0.1))
+            self.image_brain.append(nn.Dropout(p=0.05))
             self.image_brain.append(nn.LeakyReLU())
         self.process_brain = nn.Sequential(
             nn.Linear(16*8*8*16, 8192),
@@ -91,10 +91,10 @@ class QTrainer:
             color = (color, )
         state = state.reshape((state.size(dim=0), 1, 8, 8, 16))
         next_state = next_state.reshape((next_state.size(dim=0), 1, 8, 8, 16))
+        priority = []
 
         for i in range(state.size(dim=0)):
             pred = self.model(state[i])
-
             target = pred.clone()
             Q_new = reward[i]
             if not done[i]:
@@ -106,9 +106,11 @@ class QTrainer:
                 loss = self.criterion(target, pred)
                 loss.backward()
                 self.optimizer.step()
-            
+                if loss.item() > 4:
+                    priority.append((torch.reshape(state[i], (-1,)).tolist(), rand[i], reward.tolist()[i], torch.reshape(next_state[i], (-1,)).tolist(), done[i], color[i]))
         if len(done) > 1:
-            print(f"Trained off {len(done)} states!")
+            print(f"Trained off {len(done)} states!\n")
+        return priority
 
 if __name__ == '__main__':
     print("Wrong File Idiot")
