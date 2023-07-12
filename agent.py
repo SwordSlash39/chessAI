@@ -7,6 +7,8 @@ MAX_MEMORY = 80_000
 BATCH_SIZE = 2_500
 LR = 0.001
 
+
+
 class Agent:
     def __init__(self, testing=False):
         self.testing = testing
@@ -14,6 +16,7 @@ class Agent:
         self.gamma = 0.9
         self.n_games = 0
         self.memory = deque(maxlen=MAX_MEMORY)
+        self.imptMem = deque(maxlen=BATCH_SIZE//2)
         self.model = Linear_QNet().to(DEVICE)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         try:
@@ -23,7 +26,7 @@ class Agent:
             if not testing: # if testing its a waste of resources to load optimizer (no training done)
                 self.n_games = checkpoint["games"]
                 self.trainer.optimizer.load_state_dict(checkpoint["optimizer"])
-            print(f"Model at {path} loaded")
+            print(f"Model at {path} loaded\n")
         except RuntimeError:
             pass
         except FileNotFoundError:
@@ -45,13 +48,15 @@ class Agent:
         self.memory.append([state, rand, reward, next_state, done, color])
 
     def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE)
+        if len(self.memory) > BATCH_SIZE-len(self.imptMem):
+            mini_sample = random.sample(self.memory, BATCH_SIZE-len(self.imptMem))
         else:
             mini_sample = self.memory
+        if len(self.imptMem) > 1:
+            mini_sample.extend(self.imptMem)
 
         states, actions, rewards, next_states, dones, rand = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones, rand)
+        self.imptMem = deque(self.trainer.train_step(states, actions, rewards, next_states, dones, rand), maxlen=BATCH_SIZE//2)
 
     def train_short_memory(self, state, rand, reward, next_state, done, color):
         self.trainer.train_step(state, rand, reward, next_state, done, color)
