@@ -5,9 +5,9 @@ import numpy as np
 
 class chess_game:
     EN_PASSANT = 2
-    CHECKMATE = 240
+    CHECKMATE = 40
     def __init__(self, FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
-        self.board = chess.Board()
+        self.board = chess.Board(FEN)
         self.color_pieces = {"white": ['q', 'k', 'r', 'b', 'n', 'p'], "black": ['Q', 'K', 'R', 'B', 'N', 'P']}
         self.n_games = 0
         self.pieces = ['q', 'k', 'r', 'b', 'n', 'p', 'Q', 'K', 'R', 'B', 'N', 'P', '.']
