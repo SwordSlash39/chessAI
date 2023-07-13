@@ -17,6 +17,7 @@ class Linear_QNet(nn.Module):
                 padding=1
             ),
             nn.BatchNorm3d(16),
+            nn.LeakyReLU(),
             nn.Conv3d(
                 in_channels=16,
                 out_channels=16,
@@ -24,13 +25,15 @@ class Linear_QNet(nn.Module):
                 padding=1
             ),
             nn.BatchNorm3d(16),
+            nn.LeakyReLU(),
             nn.Conv3d(
                 in_channels=16,
                 out_channels=16,
                 kernel_size=3,
                 padding=1
             ),
-            nn.BatchNorm3d(16)
+            nn.BatchNorm3d(16),
+            nn.LeakyReLU()
         )
         for _ in range(4):
             self.image_brain.append(
@@ -69,7 +72,7 @@ class Linear_QNet(nn.Module):
     #     torch.save(self.state_dict(), file_name)
 
 class QTrainer:
-    def __init__(self, model, lr, gamma):
+    def __init__(self, model: Linear_QNet, lr, gamma):
         self.lr = lr
         self.gamma = gamma
         self.model = model
@@ -92,6 +95,8 @@ class QTrainer:
         priority = []
 
         for i in range(state.size(dim=0)):
+            self.optimizer.zero_grad()
+            self.model.zero_grad()
             pred = self.model(state[i])
             target = pred.clone()
             Q_new = reward[i]
@@ -100,14 +105,18 @@ class QTrainer:
                 Q_new = reward[i] + self.gamma * self.model(unsq)[0]    # self.model returns 1 value so max or min dosent matter
             if not (rand and ((Q_new < pred[0] and color[i] == "white") or (rand and Q_new > pred[0] and color[i] == "black"))): # Do training as random exploration leaded to better results (if random and Q values less than prediction means random sucked ass)
                 target[0] = Q_new
-                self.optimizer.zero_grad()
                 loss = self.criterion(target, pred)
+                if loss.item() > 1.5:
+                    priority.append([torch.reshape(state[i], (-1,)).tolist(), rand[i], reward.tolist()[i], torch.reshape(next_state[i], (-1,)).tolist(), done[i], color[i]])
                 loss.backward()
                 self.optimizer.step()
-                if loss.item() > 4:
-                    priority.append((torch.reshape(state[i], (-1,)).tolist(), rand[i], reward.tolist()[i], torch.reshape(next_state[i], (-1,)).tolist(), done[i], color[i]))
+        
+        # Training done, zero out gradients
+        self.optimizer.zero_grad()
+        self.model.zero_grad()
+        # Return values
         if len(done) > 1:
-            print(f"Trained off {len(done)} states!\n")
+            print(f"Trained off {len(done)} states!\n\n")
         return priority
 
 if __name__ == '__main__':
