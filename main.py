@@ -56,6 +56,7 @@ def train():
             QLearn(game, agent)
             move = 0            
             if reward_white >= game.CHECKMATE:  # more means win 
+                print("\nWHITE CHECKMATE!!!\n\n")
                 agent.memory[-2][2] += game.CHECKMATE
             continue
         else:
@@ -89,8 +90,9 @@ def train():
         if done_black:
             QLearn(game, agent)
             move = 0            
-            if reward_black >= game.CHECKMATE:  # more means win (win reward always more than 200 else i stoopid)
+            if reward_black >= game.CHECKMATE:  # more means win
                 agent.memory[-2][2] -= game.CHECKMATE
+                print("\nBLACK CHECKMATE!!!\n\n")
         else:
             # train short memory
             # UnboundedLocalError wont happen because already assigned earlier
