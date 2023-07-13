@@ -16,24 +16,21 @@ class Linear_QNet(nn.Module):
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.05),
-            nn.LeakyReLU(),
+            nn.BatchNorm3d(16),
             nn.Conv3d(
                 in_channels=16,
                 out_channels=16,
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.05),
-            nn.LeakyReLU(),
+            nn.BatchNorm3d(16),
             nn.Conv3d(
                 in_channels=16,
                 out_channels=16,
                 kernel_size=3,
                 padding=1
             ),
-            nn.Dropout(p=0.05),
-            nn.LeakyReLU()
+            nn.BatchNorm3d(16)
         )
         for _ in range(4):
             self.image_brain.append(
@@ -44,17 +41,16 @@ class Linear_QNet(nn.Module):
                     padding=1
                 )
             )
-            self.image_brain.append(nn.Dropout(p=0.05))
-            self.image_brain.append(nn.LeakyReLU())
+            self.image_brain.append(nn.BatchNorm3d(16))
         self.process_brain = nn.Sequential(
             nn.Linear(16*8*8*16, 8192),
-            nn.ReLU(),
+            nn.BatchNorm1d(8192),
             nn.Linear(8192, 4096),
-            nn.ReLU()
+            nn.BatchNorm1d(4096)
         )
         for _ in range(2):
             self.process_brain.append(nn.Linear(4096, 4096))
-            self.process_brain.append(nn.ReLU())
+            self.process_brain.append(nn.BatchNorm1d(4096))
         self.process_brain.append(nn.Linear(4096, 1))
     def forward(self, x):
         x = self.image_brain(x)
