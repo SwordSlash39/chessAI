@@ -14,6 +14,7 @@ def QLearn(game, agent):
     if agent.n_games % 3 == 0:
         print(f"Saving model with {agent.n_games} Games played...")
         agent.saveModel('model.pth')
+        print()
 
 def train():
     move = 1
@@ -54,7 +55,7 @@ def train():
         if done_white:  # white wins or draw
             QLearn(game, agent)
             move = 0            
-            if reward_white >= game.CHECKMATE:  # more means win (win reward always more than 200 else i stoopid)
+            if reward_white >= game.CHECKMATE:  # more means win 
                 agent.memory[-2][2] += game.CHECKMATE
             continue
         else:

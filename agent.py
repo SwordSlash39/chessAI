@@ -5,7 +5,7 @@ from gameChess import chess_game
 
 MAX_MEMORY = 80_000
 BATCH_SIZE = 2_500
-LR = 0.001
+LR = 0.0002
 
 
 
@@ -57,33 +57,35 @@ class Agent:
 
         states, actions, rewards, next_states, dones, rand = zip(*mini_sample)
         self.imptMem = deque(self.trainer.train_step(states, actions, rewards, next_states, dones, rand), maxlen=BATCH_SIZE//2)
+        self.model.zero_grad()
 
     def train_short_memory(self, state, rand, reward, next_state, done, color):
         self.trainer.train_step(state, rand, reward, next_state, done, color)
+        self.model.zero_grad()
 
     def get_action(self, board: chess.Board, color):
         self.epsilon = (80 * (0.99 ** self.n_games) + 1) if not self.testing else -1
         legalMoves = list(board.legal_moves)
-        tmp = chess_game()
+        tmp = chess_game(board.fen())
         output = [0] * len(legalMoves)
         
         if len(legalMoves) == 1:    # optimize for forced moves
             return [1], False   # false for not random
         
-        if random.random() * 200 < self.epsilon:
+        if random.random() * 100 < self.epsilon:
             output[random.randint(0, len(legalMoves) - 1)] = 1
             return output, True     # True bc its random
 
         pos_eval = []
         for i in range(len(legalMoves)):
-            board.push(legalMoves[i])
+            tmp.board.push(legalMoves[i])
             tensorState = torch.tensor(tmp.get_state(), dtype=torch.float, device=DEVICE)
             tensorState = tensorState.reshape((8, 8, 16))
             tensorState = tensorState.unsqueeze(0)
             with torch.no_grad():
-                pos_eval.append(self.model(tensorState)[0])
+                pos_eval.append(self.model(tensorState).tolist()[0][0])
             # remove last temporary move
-            board.pop()
+            tmp.board.pop()
         move = torch.tensor(pos_eval, dtype=torch.float16, device=DEVICE)
         if color == "white":
             output[move.argmax().item()] = 1
