@@ -106,8 +106,8 @@ class QTrainer:
             if not (rand and ((Q_new < pred[0] and color[i] == "white") or (rand and Q_new > pred[0] and color[i] == "black"))): # Do training as random exploration leaded to better results (if random and Q values less than prediction means random sucked ass)
                 target[0] = Q_new
                 loss = self.criterion(target, pred)
-                if loss.item() > 1.5:
-                    priority.append([torch.reshape(state[i], (-1,)).tolist(), rand[i], reward.tolist()[i], torch.reshape(next_state[i], (-1,)).tolist(), done[i], color[i]])
+                if loss.item() > 1.5:   # random true just in case model finds better move
+                    priority.append([torch.reshape(state[i], (-1,)).tolist(), True, reward.tolist()[i], torch.reshape(next_state[i], (-1,)).tolist(), done[i], color[i]])
                 loss.backward()
                 self.optimizer.step()
         
