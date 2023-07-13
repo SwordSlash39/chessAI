@@ -44,17 +44,19 @@ class Linear_QNet(nn.Module):
             self.image_brain.append(nn.BatchNorm3d(16))
         self.process_brain = nn.Sequential(
             nn.Linear(16*8*8*16, 8192),
-            nn.BatchNorm1d(8192),
+            nn.LeakyReLU(),
             nn.Linear(8192, 4096),
-            nn.BatchNorm1d(4096)
+            nn.LeakyReLU(),
         )
         for _ in range(2):
             self.process_brain.append(nn.Linear(4096, 4096))
-            self.process_brain.append(nn.BatchNorm1d(4096))
+            self.process_brain.append(nn.LeakyReLU())
         self.process_brain.append(nn.Linear(4096, 1))
     def forward(self, x):
+        x = x.view(-1, x.size(dim=0), 8, 8, 16)
         x = self.image_brain(x)
         x = torch.reshape(x, (-1,))
+        x = x.view(-1, x.size(dim=0))
         x = self.process_brain(x)
         return x
 
