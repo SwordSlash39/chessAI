@@ -10,11 +10,12 @@ LR = 0.0002
 
 
 class Agent:
-    def __init__(self, testing=False):
+    def __init__(self, testing=False, depth=2):
         self.testing = testing
         self.epsilon = 0
         self.gamma = 0.9
         self.n_games = 0
+        self.depth = depth
         self.memory = deque(maxlen=MAX_MEMORY)
         self.imptMem = deque(maxlen=BATCH_SIZE//2)
         self.model = Linear_QNet().to(DEVICE)
@@ -80,8 +81,7 @@ class Agent:
         for i in range(len(legalMoves)):
             tmp.board.push(legalMoves[i])
             tensorState = torch.tensor(tmp.get_state(), dtype=torch.float, device=DEVICE)
-            tensorState = tensorState.reshape((8, 8, 16))
-            tensorState = tensorState.unsqueeze(0)
+            tensorState = tensorState.reshape((1, 8, 8, 16))
             with torch.no_grad():
                 pos_eval.append(self.model(tensorState).tolist()[0][0])
             # remove last temporary move
