@@ -103,7 +103,7 @@ class QTrainer:
             if not done[i]:
                 unsq = next_state[i]
                 Q_new = reward[i] + self.gamma * self.model(unsq)[0]    # self.model returns 1 value so max or min dosent matter
-            if not (rand and ((Q_new < pred[0] and color[i] == "white") or (rand and Q_new > pred[0] and color[i] == "black"))): # Do training as random exploration leaded to better results (if random and Q values less than prediction means random sucked ass)
+            if not (rand and ((Q_new < pred[0] and color[i] == "white") or (rand and Q_new > pred[0] and color[i] == "black")) and pred[0]>-30 and pred[0] < 30): # Do training as random exploration leaded to better results (if random and Q values less than prediction means random sucked ass)
                 target[0] = Q_new
                 loss = self.criterion(target, pred)
                 if loss.item() > 1.5:   # random true just in case model finds better move
